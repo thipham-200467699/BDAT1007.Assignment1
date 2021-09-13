@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>carnava data</title>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
+    <!--     Fonts and icons     -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
+    <!-- CSS Files -->
+    <!-- Latest compiled and minified CSS -->
+    <link href="{{ url_for('static',filename='css/bootstrap.min.css') }}" rel="stylesheet" />
+    <link href="{{ url_for('static',filename='css/light-bootstrap-dashboard.css') }}" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="sidebar">
+            <div class="sidebar-wrapper">
+                <div class="logo">
+                    <a href="https://www.carvana.com/cars" class="simple-text">
+                        carnava's data
+                    </a>
+                </div>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="nc-icon nc-grid-45"></i>
+                            <p>Homepage</p>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="nc-icon nc-chart-pie-35"></i>
+                            <p>Dashboard</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="/datamodel">
+                            <i class="nc-icon nc-puzzle-10"></i>
+                            <p>Data Model</p>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="nav-link" href="/crud">
+                            <i class="nc-icon nc-ruler-pencil"></i>
+                            <p>CRUD</p>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="main-panel">
+            <div class="content">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="card ">
+                                <div class="card-header ">
+                                    <h4 class="card-title">Percentage By Brand</h4>
+                                </div>
+                                <div class="card-body ">
+                                    <div id="chartCarBrands" class="ct-chart ct-perfect-fourth"></div>
+								</div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="card ">
+                                <div class="card-header ">
+                                    <h4 class="card-title">Average Price (in $) By Car Brand</h4>
+                                </div>
+                                <div class="card-body ">
+                                    <div id="chartAvgPriceHigh" class="ct-chart"></div>
+                                    <div id="chartAvgPricePreferred" class="ct-chart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card ">
+                                <div class="card-header ">
+                                    <h4 class="card-title">Average Mileage By Year Of Manufacture</h4>
+                                </div>
+                                <div class="card-body ">
+                                    <div id="chartAvgMileage" class="ct-chart"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        google.charts.load("current", {packages:["corechart"]});
+        google.charts.setOnLoadCallback(visualize);
+    });
+
+    function visualize() {
+        draw_brand_statistics();
+        //draw_price_statistics();
+        //draw_mileage_statistics();
+    }
+
+    function draw_brand_statistics(){
+        var data = google.visualization.arrayToDataTable([
+			{% for key, value in data.brand_statistics.items() %}
+				{% if value is string %}
+					['{{ key }}', '{{ value }}'],
+				{% else %}
+					['{{ key }}', {{ value }}],
+				{% endif %}
+			{% endfor %}
+        ]);
+
+        var options = {
+          is3D: false,
+          chartArea: {
+            width: '90%',
+            height: '85%'
+          },
+          height: '100%',
+          width: '100%'
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('chartCarBrands'));
+        chart.draw(data, options);
+    }
+
+     
+</script>
+
+</html>
