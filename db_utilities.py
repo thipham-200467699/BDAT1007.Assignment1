@@ -21,19 +21,19 @@ class DbUtiltity:
             self.client = MongoClient(DB_CONNECTION_STRING)
     
     def drop_cars_collection(self):
-        db = self.client.finalproject
+        db = self.client.bdat1007assignm1
         db.cars.drop()
     
     def find_all_cars(self, criteria):
-        db = self.client.finalproject
+        db = self.client.bdat1007assignm1
         return db.cars.find(criteria)
     
     def find_one_car(self, criteria):
-        db = self.client.finalproject
+        db = self.client.bdat1007assignm1
         return db.cars.find_one(criteria)
 
     def save_cars_to_db(self, cars):
-        db = self.client.finalproject
+        db = self.client.bdat1007assignm1
 
         if cars and len(cars) > 0:
             try:
@@ -42,7 +42,7 @@ class DbUtiltity:
                 pass
 
     def get_car_brand_statistics(self):
-        db = self.client.finalproject
+        db = self.client.bdat1007assignm1
 
         pipeline = [
             {"$group": {"_id": "$brand", "count": {"$sum": 1}}},
@@ -51,7 +51,7 @@ class DbUtiltity:
         return list(db.cars.aggregate(pipeline))
 
     def get_avg_price_by_brand(self):
-        db = self.client.finalproject
+        db = self.client.bdat1007assignm1
 
         pipeline = [
             {"$group": {"_id": "$brand", "avg_price": {"$avg": "$price"}}},
@@ -60,7 +60,7 @@ class DbUtiltity:
         return list(db.cars.aggregate(pipeline))
     
     def get_avg_price_by_preferred_brand(self, brands):
-        db = self.client.finalproject
+        db = self.client.bdat1007assignm1
 
         pipeline = [
             {"$match": {"brand": {"$in":brands}}},
@@ -70,7 +70,7 @@ class DbUtiltity:
         return list(db.cars.aggregate(pipeline))
 
     def get_avg_mileage_by_year(self):
-        db = self.client.finalproject
+        db = self.client.bdat1007assignm1
 
         pipeline = [
             {"$group": {"_id": "$year", "avg_mileage": {"$avg": "$mileage"}}},
