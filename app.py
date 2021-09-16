@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template
+from flask import Flask, jsonify, request, render_template, redirect, session
 from data_accquiring import start_data_accquiring, build_brand_model_relationship
 from conf import MAX_NUMBER_OF_DISPLAYED_BRANDS
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -9,6 +9,10 @@ import threading
 import json
 
 app = Flask(__name__, template_folder='Templates')
+
+app.secret_key = 'super secret key'
+#app.config['SESSION_TYPE'] = 'filesystem'
+#session.init_app(app)
 
 @app.route('/')
 def index():
@@ -30,12 +34,47 @@ def dashboard():
 def selectbybrand():
     brands = brand.get_all_brands()
     data = [brand.serialize() for brand in brands]
-    
+
     return render_template('selectbybrand.html', data=json.dumps(data))
 
 @app.route('/crud')
 def crud():
-    return render_template('crud.html')
+    # get car list
+    cars = [car.serialize() for car in car.get_cars_by_filters({})]
+
+    # get brand list
+    brands = [brand.serialize() for brand in brand.get_all_brands()]
+
+    # get message
+    message = session.pop('message', None)
+
+    # build data object
+    data = {
+        'cars': cars,
+        'brands': brands,
+        'message': message
+    }
+    return render_template('crud.html', data=data)
+
+@app.route('/savecar', methods = ['POST','GET'])
+def savecar():
+    print(request.form)
+    #car_id = request.form['car_id']
+    #year = request.form['manufacture_year']
+    #brand = request.form['brand']
+    #model = request.form['model']
+    #mileage = request.form['mileage']
+    #price = request.form['price']
+
+    #c = car.Car(car_id, year, brand, model, mileage, price)
+    #print(c.serialize())
+    #employee = EmployeeModel(employee_id=employee_id, name=name, age=age, position = position)
+    #db.session.add(employee)
+    #db.session.commit()
+
+    session['message'] = "Car has been saved!"
+    return redirect('/crud')
+        
 
 @app.route('/api/v1/cars/importdata', methods=['GET'])
 def import_car_data():
@@ -98,4 +137,5 @@ def get_cars_by_filter():
 
 
 if __name__ == "__main__":
+    app.debug = True
     app.run()

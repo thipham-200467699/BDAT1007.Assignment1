@@ -58,9 +58,95 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="card">
+                            <div class="card strpied-tabled-with-hover">
+                                <div class="card-header ">
+                                    <h4 class="card-title">CAR DETAIL</h4>
+                                </div>
+                                <div class="card-body">
+                                    <form action="/savecar" method = "POST" enctype = "multipart/form-data">
+                                    <div class="row">
+                                        <div class="col-md-4 pr-1">
+                                            <div class="form-group">
+                                                <label>ID</label>
+                                                <input id="car_id" name="car_id" type="text" readonly class="form-control" placeholder="ID" value="">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 pl-1">
+                                            <div class="form-group">
+                                                <label>Manufacture Year</label>
+                                                <input type="text" id="manufacture_year" name="manufacture_year" class="form-control" placeholder="Manufacture Year" value="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 pr-1">
+                                            <div class="form-group">
+                                                <label>Brand</label>
+                                                <select id="brand" name="brand" class="form-control" placeholder="Brand">
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 pr-1" style="padding-left: 5px;">
+                                            <div class="form-group">
+                                                <label>Model</label>
+                                                <select id="model" name="model" class="form-control" placeholder="Model" style="width: 96%;">
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4 pr-1">
+                                            <div class="form-group">
+                                                <label>Mileage</label>
+                                                <input id="mileage" name="mileage" type="text" class="form-control" placeholder="Mileage" value="">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 pl-1">
+                                            <div class="form-group">
+                                                <label>Price</label>
+                                                <input id="price" name="price" type="text" class="form-control" placeholder="Price" value="">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 pl-1">
+                                            <button type="submit" class="btn btn-info btn-fill pull-right" style="margin-top:2em;">Save</button>
+                                        </div>
+                                    </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card strpied-tabled-with-hover">
+                                <div class="card-header ">
+                                    <h4 class="card-title">CAR LIST</h4>
+                                    <div class="row" >
+                                        <button name="export_csv" type="submit" class="btn btn-info btn-fill pull-right" style="margin-top:2em;margin-left:1em;">Export CSV</button>
+                                        <div>&nbsp;</div>
+                                        <button name="add_car" type="submit" class="btn btn-info btn-fill pull-right" style="margin-top:2em;margin-left:1em;">Add car</button>
+                                    </div>
+                                </div>
+                                <div class="card-body table-full-width table-responsive">
+                                    <table class="table table-hover table-striped">
+                                        <thead>
+                                            <th>ID</th>
+                                            <th>Manufacture Year</th>
+                                            <th>Brand</th>
+                                            <th>Model</th>
+                                            <th>Mileage</th>
+                                            <th>Price (in $)</th>
+                                            <th></th>
+                                            <th></th>
+                                        </thead>
+                                        <tbody id="car_list">
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
             </div>
@@ -70,9 +156,72 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
+    {% block scripts %}
+    var data = {{data|tojson|safe}};
+    {% endblock %}
+
     $(document).ready(function() {
-        
+        showCarTable();
+        fetchBranchModelData();
+
+        $('button[name="add_car"]').click(function(){
+            console.log('Want to add car...');
+        });
+    
+        $('button[name="edit_car"]').click(function(){
+            console.log('Want to edit car...');
+        });
+    
+        $('button[name="delete_car"]').click(function(){
+            console.log('Want to delete car...');
+        });
+
+        $('#brand').change(function(){
+            brandOnChange();
+        });
     });
+
+    function showCarTable(){
+        console.log(data.cars);
+        var html_str = '';
+        for(var i = 0; i < 20; i++){
+            html_str += '<tr>';
+            html_str += '<td>'+data.cars[i]._id+'</td>';
+            html_str += '<td>'+data.cars[i].year+'</td>';
+            html_str += '<td>'+data.cars[i].brand+'</td>';
+            html_str += '<td>'+data.cars[i].model+'</td>';
+            html_str += '<td>'+data.cars[i].mileage.toLocaleString('en-US')+'</td>';
+            html_str += '<td>'+data.cars[i].price.toLocaleString('en-US')+'</td>';
+            html_str += '<td><button name="edit_car" type="submit" class="btn btn-info btn-fill pull-right">Edit</button></td>';
+            html_str += '<td><button name="delete_car" type="submit" class="btn btn-info btn-fill pull-right">Delete</button></td>';
+            html_str += '</tr>';
+        }
+        $("#car_list").html(html_str);
+    }
+
+    function fetchBranchModelData(){
+        var html_str = '';
+        data.brands.forEach(element => {
+            html_str += '<option value="'+element.name+'">'+element.name+'</option>';
+        });
+        $("#brand").html(html_str);
+        $("#brand").val($("#brand option:first").val());
+        brandOnChange();
+    }
+
+    function brandOnChange(){
+        var html_str = '';
+        var selected_brand = $("#brand").val();
+        data.brands.forEach(element => {
+            if(selected_brand == element.name){
+                element.models.forEach(model => {
+                    html_str += '<option value="'+model+'">'+model+'</option>';
+                });
+            }
+        });
+        $("#model").html(html_str);
+        $("#model").val($("#model option:first").val());
+    }
         
 </script>
 
