@@ -3,6 +3,8 @@ from pymongo.errors import BulkWriteError
 from bson.son import SON
 from conf import DB_CONNECTION_STRING
 
+import uuid
+
 
 class DbUtiltity:
 
@@ -24,6 +26,40 @@ class DbUtiltity:
         db = self.client.bdat1007assignm1
         db.cars.drop()
     
+    def drop_brand_models_collection(self):
+        db = self.client.bdat1007assignm1
+        db.brand_models.drop()
+
+    def find_brand_models(self):
+        db = self.client.bdat1007assignm1
+
+        pipeline = [
+            {"$group": { "_id": { "brand": "$brand", "model": "$model" } } }
+        ]
+        return list(db.cars.aggregate(pipeline))
+    
+    def save_brand_models(self, brand_models):
+        db = self.client.bdat1007assignm1
+        if brand_models and len(brand_models) > 0:
+            db.brand_models.insert_many(documents=brand_models, ordered=False)
+    
+    def save_brand_model(self, brand_model):
+        db = self.client.bdat1007assignm1
+        db.brand_models.insert_one(brand_model)
+    
+    def find_all_brands(self):
+        db = self.client.bdat1007assignm1
+        #pipeline = [
+        #    {"$group": { "_id": { "brand": "$brand"} } }
+        #]
+        #return db.brand_models.aggregate(pipeline)
+        return db.brand_models.find({})
+    
+    def find_models_by_brand(self, brand):
+        db = self.client.bdat1007assignm1
+
+        return db.brand_models.find({"brand":brand})
+    
     def find_all_cars(self, criteria):
         db = self.client.bdat1007assignm1
         return db.cars.find(criteria)
@@ -40,6 +76,14 @@ class DbUtiltity:
                 db.cars.insert_many(documents=cars, ordered=False)
             except BulkWriteError as e:
                 pass
+    
+    def save_car(self, car):
+        db = self.client.bdat1007assignm1
+        db.cars.insert_one(car)
+    
+    def update_car(self, car):
+        db = self.client.bdat1007assignm1
+        #db.cars.update({'_id':'??'},{'$set':{'title':'??'}})
 
     def get_car_brand_statistics(self):
         db = self.client.bdat1007assignm1

@@ -27,7 +27,15 @@ def start_data_accquiring():
         except Exception as e:
             print(e)
 
-    #print(f'Done sucessfully! Car count: {car_count}')
+    build_brand_model_relationship()
+
+def build_brand_model_relationship():
+    with DbUtiltity() as db_util:
+        db_util.connect_to_db()
+        db_util.drop_brand_models_collection()
+
+        brand_model_pairs = [id['_id'] for id in db_util.find_brand_models()]
+        db_util.save_brand_models(brand_model_pairs)
 
 def process_one_page(current_page):
     cars = []

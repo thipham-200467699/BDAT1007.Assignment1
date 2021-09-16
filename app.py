@@ -1,12 +1,12 @@
 from flask import Flask, jsonify, request, render_template
-from data_accquiring import start_data_accquiring
+from data_accquiring import start_data_accquiring, build_brand_model_relationship
 from conf import MAX_NUMBER_OF_DISPLAYED_BRANDS
 from apscheduler.schedulers.background import BackgroundScheduler
 import car
+import brand
 import sys
 import threading
-import time
-import atexit
+import json
 
 app = Flask(__name__, template_folder='Templates')
 
@@ -26,9 +26,12 @@ def dashboard():
 
     return render_template('dashboard.html', data=data)
 
-@app.route('/datamodel')
-def datamodel():
-    return render_template('datamodel.html')
+@app.route('/selectbybrand')
+def selectbybrand():
+    brands = brand.get_all_brands()
+    data = [brand.serialize() for brand in brands]
+    
+    return render_template('selectbybrand.html', data=json.dumps(data))
 
 @app.route('/crud')
 def crud():
