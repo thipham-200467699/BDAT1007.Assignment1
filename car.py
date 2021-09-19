@@ -9,6 +9,30 @@ class Car:
         self.model = p_model
         self.mileage = p_mileage
         self.price = p_price
+
+    @property
+    def get_id(self):
+         return self._id
+
+    @property
+    def get_year(self):
+         return self.year
+
+    @property
+    def get_brand(self):
+         return self.brand
+
+    @property
+    def get_model(self):
+         return self.model
+
+    @property
+    def get_mileage(self):
+         return self.mileage
+
+    @property
+    def get_price(self):
+         return self.price
     
     def serialize(self):
         return {
@@ -108,3 +132,25 @@ def get_avg_mileage_by_year():
             result.update({str(stat['_id']): stat['avg_mileage']})
 
     return result
+
+def get_next_car_id():
+    result = ""
+
+    with DbUtiltity() as db_util:
+        max_id = db_util.get_max_car_id()
+        next_id = int(max_id, 10) + 1
+        result = str(next_id)
+
+    return result
+
+def create_car(car):
+    with DbUtiltity() as db_util:
+        db_util.save_car(car.serialize())
+
+def update_car(car):
+    with DbUtiltity() as db_util:
+        db_util.update_car(car)
+
+def delete_car(car_id):
+    with DbUtiltity() as db_util:
+        db_util.delete_car(car_id)

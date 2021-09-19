@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request, render_template, redirect, session
-from data_accquiring import start_data_accquiring, build_brand_model_relationship
-from conf import MAX_NUMBER_OF_DISPLAYED_BRANDS
+from data_accquiring import start_data_accquiring
 from apscheduler.schedulers.background import BackgroundScheduler
 import car
 import brand
@@ -17,18 +16,6 @@ app.secret_key = 'super secret key'
 @app.route('/')
 def index():
     return render_template('index.html')
-
-@app.route('/dashboard')
-def dashboard():
-    # Get brand statistics
-    brand_statistics = car.get_car_brand_statistics()
-    data1 = {'Brands':'Count'}
-    data1.update(brand_statistics)
-
-    # build final data
-    data = {'brand_statistics': data1}
-
-    return render_template('dashboard.html', data=data)
 
 @app.route('/selectbybrand')
 def selectbybrand():
@@ -58,23 +45,32 @@ def crud():
 
 @app.route('/savecar', methods = ['POST','GET'])
 def savecar():
-    print(request.form)
-    #car_id = request.form['car_id']
-    #year = request.form['manufacture_year']
-    #brand = request.form['brand']
-    #model = request.form['model']
-    #mileage = request.form['mileage']
-    #price = request.form['price']
+    car_id = request.form['car_id']
+    year = request.form['manufacture_year']
+    brand = request.form['brand']
+    model = request.form['model']
+    mileage = int(request.form['mileage'], 10)
+    price = int(request.form['price'], 10)
 
-    #c = car.Car(car_id, year, brand, model, mileage, price)
-    #print(c.serialize())
-    #employee = EmployeeModel(employee_id=employee_id, name=name, age=age, position = position)
-    #db.session.add(employee)
-    #db.session.commit()
+    if car_id:
+        c = car.Car(car_id, year, brand, model, mileage, price)
+        car.update_car(c)
+        session['message'] = "The car has been updated!"
+    else:
+        c = car.Car(car.get_next_car_id(), year, brand, model, mileage, price)
+        car.create_car(c)
+        session['message'] = "The car has been created!"
 
-    session['message'] = "Car has been saved!"
     return redirect('/crud')
-        
+
+@app.route('/deletecar', methods = ['POST','GET'])
+def deletecar():
+    car_id = request.form['deleted_car_id']
+
+    car.delete_car(car_id)
+
+    session['message'] = "The car has been deleted!"
+    return redirect('/crud')
 
 @app.route('/api/v1/cars/importdata', methods=['GET'])
 def import_car_data():

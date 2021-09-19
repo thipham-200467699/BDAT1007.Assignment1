@@ -49,10 +49,6 @@ class DbUtiltity:
     
     def find_all_brands(self):
         db = self.client.bdat1007assignm1
-        #pipeline = [
-        #    {"$group": { "_id": { "brand": "$brand"} } }
-        #]
-        #return db.brand_models.aggregate(pipeline)
         return db.brand_models.find({})
     
     def find_models_by_brand(self, brand):
@@ -62,7 +58,7 @@ class DbUtiltity:
     
     def find_all_cars(self, criteria):
         db = self.client.bdat1007assignm1
-        return db.cars.find(criteria)
+        return db.cars.find(criteria).sort([('_id', -1)])
     
     def find_one_car(self, criteria):
         db = self.client.bdat1007assignm1
@@ -83,7 +79,16 @@ class DbUtiltity:
     
     def update_car(self, car):
         db = self.client.bdat1007assignm1
-        #db.cars.update({'_id':'??'},{'$set':{'title':'??'}})
+        db.cars.update({'_id':car._id},{'$set':{'year':car.year, 'brand':car.brand, 'model':car.model, 'mileage':car.mileage, 'price':car.price}})
+
+    def delete_car(self, car_id):
+        db = self.client.bdat1007assignm1
+        db.cars.delete_one({'_id':car_id})
+
+    def get_max_car_id(self):
+        db = self.client.bdat1007assignm1
+        c = db.cars.find().sort([('_id', -1)]).limit(1)
+        return c[0]["_id"]
 
     def get_car_brand_statistics(self):
         db = self.client.bdat1007assignm1

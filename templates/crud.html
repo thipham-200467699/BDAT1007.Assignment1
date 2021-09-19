@@ -33,12 +33,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard">
-                            <i class="nc-icon nc-chart-pie-35"></i>
-                            <p>Dashboard</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="/selectbybrand">
                             <i class="nc-icon nc-puzzle-10"></i>
                             <p>Select by brand</p>
@@ -58,6 +52,11 @@
                 <div class="container-fluid">
                     <div class="row">
                         <div class="col-md-12">
+                            <p style="color: deepskyblue;" id="message" class="card-category"></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
                             <div class="card strpied-tabled-with-hover">
                                 <div class="card-header ">
                                     <h4 class="card-title">CAR DETAIL</h4>
@@ -74,7 +73,7 @@
                                         <div class="col-md-4 pl-1">
                                             <div class="form-group">
                                                 <label>Manufacture Year</label>
-                                                <input type="text" id="manufacture_year" name="manufacture_year" class="form-control" placeholder="Manufacture Year" value="">
+                                                <input type="text" id="manufacture_year" disabled name="manufacture_year" class="form-control" placeholder="Manufacture Year" value="">
                                             </div>
                                         </div>
                                     </div>
@@ -82,14 +81,14 @@
                                         <div class="col-md-4 pr-1">
                                             <div class="form-group">
                                                 <label>Brand</label>
-                                                <select id="brand" name="brand" class="form-control" placeholder="Brand">
+                                                <select id="brand" name="brand" disabled class="form-control" placeholder="Brand">
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="col-md-4 pr-1" style="padding-left: 5px;">
                                             <div class="form-group">
                                                 <label>Model</label>
-                                                <select id="model" name="model" class="form-control" placeholder="Model" style="width: 96%;">
+                                                <select id="model" name="model" disabled class="form-control" placeholder="Model" style="width: 96%;">
                                                 </select>
                                             </div>
                                         </div>
@@ -98,17 +97,17 @@
                                         <div class="col-md-4 pr-1">
                                             <div class="form-group">
                                                 <label>Mileage</label>
-                                                <input id="mileage" name="mileage" type="text" class="form-control" placeholder="Mileage" value="">
+                                                <input id="mileage" name="mileage" disabled type="text" class="form-control" placeholder="Mileage" value="">
                                             </div>
                                         </div>
                                         <div class="col-md-4 pl-1">
                                             <div class="form-group">
                                                 <label>Price</label>
-                                                <input id="price" name="price" type="text" class="form-control" placeholder="Price" value="">
+                                                <input id="price" name="price" disabled type="text" class="form-control" placeholder="Price" value="">
                                             </div>
                                         </div>
                                         <div class="col-md-4 pl-1">
-                                            <button type="submit" class="btn btn-info btn-fill pull-right" style="margin-top:2em;">Save</button>
+                                            <button id="btn_save_car" type="submit" disabled class="btn btn-info btn-fill pull-right" style="margin-top:2em;">Save</button>
                                         </div>
                                     </div>
                                     </form>
@@ -122,8 +121,6 @@
                                 <div class="card-header ">
                                     <h4 class="card-title">CAR LIST</h4>
                                     <div class="row" >
-                                        <button name="export_csv" type="submit" class="btn btn-info btn-fill pull-right" style="margin-top:2em;margin-left:1em;">Export CSV</button>
-                                        <div>&nbsp;</div>
                                         <button name="add_car" type="submit" class="btn btn-info btn-fill pull-right" style="margin-top:2em;margin-left:1em;">Add car</button>
                                     </div>
                                 </div>
@@ -152,6 +149,9 @@
             </div>
         </div>
     </div>
+    <form action="/deletecar" id="deletecar" method = "POST" enctype = "multipart/form-data">
+        <input id="deleted_car_id" name="deleted_car_id" type="hidden" readonly class="form-control" placeholder="ID" value="">
+    </form>
 </body>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -164,16 +164,58 @@
         showCarTable();
         fetchBranchModelData();
 
+        var msg = data.message;
+        if(msg != null && msg.length > 0){
+            $("#message").text(msg);
+        }
+
         $('button[name="add_car"]').click(function(){
-            console.log('Want to add car...');
+            $("#manufacture_year").prop('disabled', false);
+            $("#brand").prop('disabled', false);
+            $("#model").prop('disabled', false);
+            $("#mileage").prop('disabled', false);
+            $("#price").prop('disabled', false);
+            $("#btn_save_car").prop('disabled', false);
+
+            $("#manufacture_year").val(""); 
+            $("#brand").val($("#brand option:first").val());
+            brandOnChange();
+            $("#mileage").val(""); 
+            $("#price").val("");
         });
     
         $('button[name="edit_car"]').click(function(){
-            console.log('Want to edit car...');
+            $("#manufacture_year").prop('disabled', false);
+            $("#brand").prop('disabled', false);
+            $("#model").prop('disabled', false);
+            $("#mileage").prop('disabled', false);
+            $("#price").prop('disabled', false);
+            $("#btn_save_car").prop('disabled', false);
+
+            var tr_tag = $(this).parent().parent();
+            var _id = $(tr_tag.find($('td'))[0]).text();
+            var _year = $(tr_tag.find($('td'))[1]).text();
+            var _brand = $(tr_tag.find($('td'))[2]).text();
+            var _model = $(tr_tag.find($('td'))[3]).text();
+            var _mileage = $(tr_tag.find($('td'))[4]).text().replace(',','');
+            var _price = $(tr_tag.find($('td'))[5]).text().replace(',','');
+            
+            $("#car_id").val(_id); 
+            $("#manufacture_year").val(_year); 
+            $("#brand").val(_brand);
+            brandOnChange();
+            $("#model").val(_model);
+            $("#mileage").val(_mileage); 
+            $("#price").val(_price);
         });
     
         $('button[name="delete_car"]').click(function(){
-            console.log('Want to delete car...');
+            var tr_tag = $(this).parent().parent();
+            var _id = $(tr_tag.find($('td'))[0]).text();
+            
+            $("#deleted_car_id").val(_id);
+
+            $('form#deletecar').submit();
         });
 
         $('#brand').change(function(){
@@ -182,9 +224,11 @@
     });
 
     function showCarTable(){
-        console.log(data.cars);
         var html_str = '';
-        for(var i = 0; i < 20; i++){
+        for(var i = 0; i < data.cars.length; i++){
+            if(i==0){
+                console.log(data.cars[i].mileage);
+            }
             html_str += '<tr>';
             html_str += '<td>'+data.cars[i]._id+'</td>';
             html_str += '<td>'+data.cars[i].year+'</td>';
