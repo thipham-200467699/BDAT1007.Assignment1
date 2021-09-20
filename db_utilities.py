@@ -1,6 +1,5 @@
 from pymongo import MongoClient
 from pymongo.errors import BulkWriteError
-from bson.son import SON
 from conf import DB_CONNECTION_STRING
 
 import uuid
@@ -89,43 +88,6 @@ class DbUtiltity:
         db = self.client.bdat1007assignm1
         c = db.cars.find().sort([('_id', -1)]).limit(1)
         return c[0]["_id"]
-
-    def get_car_brand_statistics(self):
-        db = self.client.bdat1007assignm1
-
-        pipeline = [
-            {"$group": {"_id": "$brand", "count": {"$sum": 1}}},
-            {"$sort": SON([("count", -1)])}
-        ]
-        return list(db.cars.aggregate(pipeline))
-
-    def get_avg_price_by_brand(self):
-        db = self.client.bdat1007assignm1
-
-        pipeline = [
-            {"$group": {"_id": "$brand", "avg_price": {"$avg": "$price"}}},
-            {"$sort": SON([("avg_price", -1)])}
-        ]
-        return list(db.cars.aggregate(pipeline))
-    
-    def get_avg_price_by_preferred_brand(self, brands):
-        db = self.client.bdat1007assignm1
-
-        pipeline = [
-            {"$match": {"brand": {"$in":brands}}},
-            {"$group": {"_id": "$brand", "avg_price": {"$avg": "$price"}}},
-            {"$sort": SON([("avg_price", 1)])}
-        ]
-        return list(db.cars.aggregate(pipeline))
-
-    def get_avg_mileage_by_year(self):
-        db = self.client.bdat1007assignm1
-
-        pipeline = [
-            {"$group": {"_id": "$year", "avg_mileage": {"$avg": "$mileage"}}},
-            {"$sort": SON([("_id", 1)])}
-        ]
-        return list(db.cars.aggregate(pipeline))
     
     def close_connection(self):
         if self.client:
