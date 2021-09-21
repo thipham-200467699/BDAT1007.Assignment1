@@ -16,10 +16,30 @@ def index():
 
 @app.route('/selectbybrand')
 def selectbybrand():
+    # get all brands and their models
     brands = brand.get_all_brands()
-    data = [brand.serialize() for brand in brands]
 
-    return render_template('selectbybrand.html', data=json.dumps(data))
+    # get message
+    message = session.pop('message', None)
+
+    data = {
+        'brands': [brand.serialize() for brand in brands],
+        'message': message
+    }
+
+    return render_template('selectbybrand.html', data=data)
+
+
+@app.route('/savebrandmodel', methods = ['POST','GET'])
+def savebrandmodel():
+    selected_brand = request.form['selected_brand']
+    selected_model = request.form['selected_model']
+
+    brand.add_model_to_brand(selected_brand, selected_model)
+
+    session['message'] = f'Model {selected_model} has been added to brand {selected_brand}'
+
+    return redirect('/selectbybrand')
 
 
 @app.route('/crud')

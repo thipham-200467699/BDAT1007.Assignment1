@@ -226,9 +226,6 @@
     function showCarTable(){
         var html_str = '';
         for(var i = 0; i < data.cars.length; i++){
-            if(i==0){
-                console.log(data.cars[i].mileage);
-            }
             html_str += '<tr>';
             html_str += '<td>'+data.cars[i]._id+'</td>';
             html_str += '<td>'+data.cars[i].year+'</td>';
